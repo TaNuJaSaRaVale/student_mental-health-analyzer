@@ -61,14 +61,14 @@ Cross-validation accuracy: **~83%**
 - Explainable AI insights  
 - Personalized mental health suggestions  
 
+## 🚀 Live Demo
+
+🔗 **Try the App:**  
+👉 [Student Mental Health Analyzer](https://student-mental-health-analyzer.streamlit.app/)
+
 ---
 
-## 📸 Demo
-
-*(Add your app screenshot here)*
-
----
-
+💡 *Enter student details and get instant mental health risk analysis with insights.*
 ## ▶️ How to Run Locally
 
 ### 1. Clone the repository
