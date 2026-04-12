@@ -16,7 +16,11 @@ st.markdown("---")
 # Inputs
 gender = st.selectbox("Gender", ["Male", "Female"])
 age = st.slider("Age", 15, 30, 20)
-cgpa = st.slider("CGPA", 0.0, 4.0, 3.0)
+cgpa_ui = st.slider("Latest CGPA", 0.0, 10.0, 8.5, step=0.1)
+
+# The ML model expects a 4.0 scale, so we map the 10.0 input down.
+cgpa = (cgpa_ui / 10.0) * 4.0
+
 
 marital = st.selectbox("Marital Status", ["No", "Yes"])
 anxiety = st.selectbox("Do you have Anxiety?", ["No", "Yes"])
