@@ -2,7 +2,7 @@ const API_URL = import.meta.env.PROD ? "" : "http://localhost:8000";
 
 export const getPrediction = async (formData) => {
   try {
-    const response = await fetch(`${API_URL}/predict`, {
+    const response = await fetch(`${API_URL}/api/predict`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
