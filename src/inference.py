@@ -2,11 +2,14 @@ import os
 import pickle
 import pandas as pd
 
-def load_model():
+def load_model_and_scaler():
     model_path = os.path.join(os.path.dirname(__file__), '..', 'mental_health_model.pkl')
+    scaler_path = os.path.join(os.path.dirname(__file__), '..', 'scaler.pkl')
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
-    return model
+    with open(scaler_path, 'rb') as f:
+        scaler = pickle.load(f)
+    return model, scaler
 
 def predict(input_data: dict) -> dict:
     """"
@@ -19,14 +22,12 @@ def predict(input_data: dict) -> dict:
     - panic_attack: int (0 or 1)
     - treatment: int (0 or 1)
     """""
-    model = load_model()
+    model, scaler = load_model_and_scaler()
     
-    # Needs to match the columns expected by the trained model (from X in data_processing.py)
-    # The columns in the trained X were:
-    # 'Choose your gender', 'Age', 'What is your CGPA?', 'Marital status', 
-    # 'Do you have Anxiety?', 'Do you have Panic attack?', 
-    # 'Did you seek any specialist for a treatment?'
+    # 1. Feature Engineering
+    symptom_severity = input_data['anxiety'] + input_data['panic_attack']
     
+    # Needs to match the columns expected by the trained model exactly
     df_input = pd.DataFrame([{
         'Choose your gender': input_data['gender'],
         'Age': input_data['age'],
@@ -34,11 +35,16 @@ def predict(input_data: dict) -> dict:
         'Marital status': input_data['marital_status'],
         'Do you have Anxiety?': input_data['anxiety'],
         'Do you have Panic attack?': input_data['panic_attack'],
-        'Did you seek any specialist for a treatment?': input_data['treatment']
+        'Did you seek any specialist for a treatment?': input_data['treatment'],
+        'Symptom_Severity': symptom_severity
     }])
     
-    prediction = model.predict(df_input)[0]
-    probability = model.predict_proba(df_input)[0][1] # Probability of '1' (Depression)
+    # 2. Scale
+    X_scaled = scaler.transform(df_input)
+    
+    # 3. Predict
+    prediction = model.predict(X_scaled)[0]
+    probability = model.predict_proba(X_scaled)[0][1] # Probability of '1' (Depression)
     
     return {
         "prediction": int(prediction),

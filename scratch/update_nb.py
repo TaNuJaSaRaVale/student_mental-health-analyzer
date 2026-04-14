@@ -1,0 +1,182 @@
+import json
+
+notebook_content = {
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Real-World Accuracy Enhancement Pipeline\n",
+    "This pipeline focuses on extracting real-world accuracy through Best Practices: Feature Engineering, Cross-Validation, and XGBoost Hyperparameter Tuning."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "import xgboost as xgb\n",
+    "from sklearn.model_selection import train_test_split, GridSearchCV\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.metrics import accuracy_score, classification_report, confusion_matrix\n",
+    "import pickle\n",
+    "\n",
+    "import sys\n",
+    "import os\n",
+    "sys.path.append(os.path.abspath(os.path.join(os.getcwd(), 'src')))\n",
+    "from data_processing import clean_data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 1. Data Loading & Preprocessing"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('Student Mental health.csv')\n",
+    "\n",
+    "# Impute age median to avoid NaN drops\n",
+    "df['Age'] = df['Age'].fillna(df['Age'].median())\n",
+    "\n",
+    "df = clean_data(df)\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2. Feature Engineering\n",
+    "We introduce `Symptom_Severity` to help the model quantify combined psychological strain before predicting depression."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = df.drop('Do you have Depression?', axis=1)\n",
+    "y = df['Do you have Depression?']\n",
+    "\n",
+    "X['Symptom_Severity'] = X['Do you have Anxiety?'] + X['Do you have Panic attack?']\n",
+    "X.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 3. Scaling & Train-Test Split"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scaler = StandardScaler()\n",
+    "X_scaled = scaler.fit_transform(X)\n",
+    "\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42, stratify=y)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4. Advanced Modeling (XGBoost) with GridSearchCV\n",
+    "Instead of blind guessing, we use Grid Search to cross-validate multiple hyperparameter combinations."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "xgb_model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)\n",
+    "\n",
+    "param_grid = {\n",
+    "    'n_estimators': [50, 100, 200],\n",
+    "    'max_depth': [3, 5, 7],\n",
+    "    'learning_rate': [0.01, 0.1, 0.2],\n",
+    "    'subsample': [0.8, 1.0]\n",
+    "}\n",
+    "\n",
+    "grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1)\n",
+    "grid_search.fit(X_train, y_train)\n",
+    "\n",
+    "best_model = grid_search.best_estimator_\n",
+    "print(\"Optimal Settings Found:\", grid_search.best_params_)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 5. Evaluation & Export"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_pred = best_model.predict(X_test)\n",
+    "print(f\"Test Accuracy: {accuracy_score(y_test, y_pred):.4f}\")\n",
+    "print(\"\\nClassification Report:\\n\", classification_report(y_test, y_pred))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pickle.dump(best_model, open(\"mental_health_model.pkl\", \"wb\"))\n",
+    "pickle.dump(scaler, open(\"scaler.pkl\", \"wb\"))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
+
+with open("mental_health_analysis.ipynb", "w", encoding='utf-8') as f:
+    json.dump(notebook_content, f, indent=1)
+
+print("Notebook updated.")

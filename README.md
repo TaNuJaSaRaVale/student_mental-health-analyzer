@@ -1,104 +1,81 @@
-# 🧠 Student Mental Health Analyzer
+# 🧠 Student Mental Health Analyzer (Machine Learning Project)
 
-A Machine Learning-based web application that predicts the likelihood of depression in students based on lifestyle and personal factors.
-
----
-
-## 🚀 Overview
-
-This project analyzes student data such as age, CGPA, anxiety levels, and lifestyle habits to predict mental health risk using a trained ML model.
-
-The system provides:
-- 📊 Risk prediction (Low / Medium / High)
-- 📈 Probability score
-- 🧠 Explanation of influencing factors
-- 💡 Personalized suggestions
+An end-to-end Machine Learning pipeline and full-stack web application designed to predict the likelihood of depression in university students based on academic, physiological, and lifestyle factors.
 
 ---
 
-## 🛠️ Tech Stack
+## 🎯 Project Objective & Vision
 
-- **Python**
-- **Scikit-learn** (Machine Learning)
-- **Streamlit** (Web Application)
-- **NumPy & Pandas** (Data Processing)
-- **Matplotlib & Seaborn** (Visualization)
+Student mental health is a critical, often under-reported issue in modern academia. The stress of coursework, combined with personal lifestyle factors, can silently lead to extreme psychological strain. 
+
+**This project aims to detect potential mental health risks early.** By analyzing data points such as a student's age, CGPA, panic attack history, anxiety, and relationship status, the ML model provides a risk assessment to encourage students to proactively seek professional help.
 
 ---
 
-## 📊 Machine Learning Workflow
+## 🛠️ The Machine Learning Pipeline
 
-1. Data Cleaning & Preprocessing  
-2. Feature Encoding (categorical → numeric)  
-3. Model Training (Random Forest, Logistic Regression)  
-4. Handling Class Imbalance (`class_weight='balanced'`)  
-5. Model Evaluation:
-   - Accuracy
-   - Precision
-   - Recall
-   - F1-score
-   - Cross-validation  
-6. Model Deployment using Streamlit  
+To ensure the model is suitable for "real-world" inference, the project utilizes advanced Data Science methodologies rather than relying on basic algorithms. 
 
----
+### 1. Robust Dataset Generation & Balancing
+Starting from a foundational dataset of ~100 responses, an advanced data augmentation script was used to safely expand the dataset to **1,000 realistic records**. This process jittered continuous values (like Age) using statistical normal distributions and balanced the gender ratio (50% Male / 50% Female) to prevent the AI from developing gender biases.
 
-## 🧠 Model Performance
+### 2. Feature Engineering
+Raw data is rarely enough. Our preprocessing pipeline introduces **`Symptom_Severity`**—an engineered feature that mathematically combines the presence of Anxiety and Panic Attacks. This grants the model deeper psychological context before it attempts to classify depression.
 
-| Model                | Accuracy |
-|---------------------|---------|
-| Random Forest       | ~80%    |
-| Logistic Regression | ~95%    |
+### 3. Advanced Modeling: XGBoost & GridSearchCV
+Instead of basic algorithms, the engine relies on **XGBoost (Extreme Gradient Boosting)**, an industry-standard algorithm known for its high performance on tabular data.
+To prevent overfitting:
+- **GridSearchCV** was deployed to automatically test 54 combinations of hyperparameters (`max_depth`, `learning_rate`, `n_estimators`, `subsample`).
+- **Stratified 5-Fold Cross-Validation** was used to ensure the model generalizes perfectly across unseen data splits, yielding an optimal and reliable real-world accuracy score (~75-80%).
 
-Cross-validation accuracy: **~83%**
+### 4. End-to-End Application Infrastructure
+The model (`model.pkl` and `scaler.pkl`) is served through robust logic that automatically calculates engineered features on the fly, making it scalable for frontend integration.
 
 ---
 
-## 💻 Features
-
-- Interactive user interface  
-- Real-time prediction  
-- Probability-based risk levels  
-- Explainable AI insights  
-- Personalized mental health suggestions  
-
-## 🚀 Live Demo
-
-🔗 **Try the App:**  
-👉 [Student Mental Health Analyzer](https://student-mental-health-analyzer.streamlit.app/)
+## 💻 Tech Stack
+*   **AI/ML Core**: Python, XGBoost, Scikit-Learn, Pandas, NumPy
+*   **API / Backend**: FastAPI, Uvicorn, Pydantic
+*   **Data Visualization**: Matplotlib, Seaborn
+*   **Web Interfaces**: 
+    1. Streamlit Dashboard (Rapid prototyping UI)
+    2. React/Vite Frontend (Professional user interface)
 
 ---
 
-💡 *Enter student details and get instant mental health risk analysis with insights.*
-## ▶️ How to Run Locally
+## 🚀 How to Run the Project Locally
 
-### 1. Clone the repository
+Because this project features both a pure Python backend API and a modern JS frontend, you will need two terminal windows.
 
-```bash
-git clone https://github.com/YOUR_USERNAME/mental-health-analyzer.git
-cd mental-health-analyzer
-2. Install dependencies
-pip install -r requirements.txt
-3. Run the application
-streamlit run app.py
-⚠️ Disclaimer
+### Terminal 1: Start the Backend AI Engine
+1. Open terminal in the root folder (`mental-health-analyzer`).
+2. Install the necessary Python packages: `pip install -r requirements.txt`
+3. Launch the API:
+   ```bash
+   uvicorn api.index:app --reload
+   ```
 
-This application is intended for educational purposes only.
-It is not a medical diagnosis tool and should not be used as a substitute for professional mental health advice.
+### Terminal 2: Start the Web UI
+1. Open a new terminal and navigate to the frontend folder:
+   ```bash
+   cd frontend
+   ```
+2. Start the React server:
+   ```bash
+   npm run dev
+   ```
+*(A local link like `http://localhost:5173` will be generated. Open this in your browser to interact with the model.)*
 
-📌 Future Improvements
-Larger and more diverse dataset
-Deep learning models
-Mobile app integration
-Real-time monitoring system
-👩‍💻 Author
+*(Optional: To run the secondary Python-only Streamlit interface, simply run `streamlit run app.py` in the root folder).*
 
-Tanuja Saravale
-AIML Student | Aspiring AI Engineer
+---
 
-⭐ If you like this project
+## ⚠️ Important Analytical Disclaimer Regarding Data Logic
 
-Give it a star ⭐ on GitHub
-
+> **Note on Marital Status and Student Stress:**
+> During the evaluation of the model's logic, statistical correlations may appear regarding marital status. **This model does *not* state that marriage generally causes high levels of depression in the real world.** Rather, it specifies that *students* who are married—while simultaneously attempting to manage university courses, potential financial strain, and examinations—exhibit statistically higher rates of psychological distress due to combining heavy academic burdens with significant personal responsibilities.
+> 
+> *Furthermore, this application is a predictive academic tool. It is not a medical diagnosis tool and should never be used as a substitute for certified psychiatric evaluation.*
 
 ---
 
